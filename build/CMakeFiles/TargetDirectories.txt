@@ -1,2 +1,0 @@
-/home/uuqv/repos/vulkan/build/CMakeFiles/edit_cache.dir
-/home/uuqv/repos/vulkan/build/CMakeFiles/rebuild_cache.dir
