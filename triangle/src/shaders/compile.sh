@@ -1,0 +1,1 @@
+/usr/local/bin/glslc shader.vert -o vert.spv
