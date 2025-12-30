@@ -93,6 +93,7 @@ private:
             throw std::runtime_error("validationlayers requested, but not available!");
         }
         createInstance();
+        createSurface();
         pickPhysicalDevice();
         createLogicalDevice();
         createSwapChain();
@@ -207,6 +208,14 @@ private:
 
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &presentQueue);
+    }
+
+    void createSurface()
+    {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create window surface!");
+        }
     }
 
     void pickPhysicalDevice()
