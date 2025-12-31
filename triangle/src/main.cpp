@@ -100,6 +100,7 @@ private:
         createLogicalDevice();
         createSwapChain();
         createImageViews();
+        createRenderPass();
         createGraphicsPipeline();
     }
 
@@ -235,6 +236,22 @@ private:
 
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    }
+
+    void createRenderPass()
+    {
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format = swapChainImageFormat;
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     }
 
     VkShaderModule createShaderModule(const std::vector<char> &code)
