@@ -64,6 +64,10 @@ private:
 
     VkCommandBuffer commandBuffer;
 
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
+    VkFence inFlightFence;
+
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -112,6 +116,21 @@ private:
         createFrameBuffers();
         createCommandPool();
         createCommandBuffer();
+        createSyncObjects();
+    }
+
+    void createSyncObjects()
+    {
+        VkSemaphoreCreateInfo semaphoreInfo{};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VkFenceCreateInfo fenceInfo{};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS || vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS || vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create semaphores!");
+        }
     }
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -837,16 +856,24 @@ private:
         swapChainExtent = extent;
     }
 
+    void drawFrame() {
+
+    };
+
     void mainLoop()
     {
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
+            drawFrame();
         }
     }
 
     void cleanup()
     {
+        vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
+        vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
+        vkDestroyFence(device, inFlightFence, nullptr);
         vkDestroyCommandPool(device, commandPool, nullptr);
         for (auto framebuffer : swapChainFramebuffers)
         {
