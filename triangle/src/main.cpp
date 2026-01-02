@@ -72,8 +72,6 @@ private:
 
     uint32_t currentFrame = 0;
 
-    std::vector<VkFence> inFlightFences;
-
     bool framebufferResized = false;
 
     struct QueueFamilyIndices
