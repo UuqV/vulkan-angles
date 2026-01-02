@@ -72,6 +72,10 @@ private:
 
     uint32_t currentFrame = 0;
 
+    std::vector<VkFence> inFlightFences;
+
+    bool framebufferResized = false;
+
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -93,6 +97,12 @@ private:
         std::vector<VkPresentModeKHR> presentModes;
     };
 
+    static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
+    {
+        auto app = reinterpret_cast<HelloTriangleApplication *>(glfwGetWindowUserPointer(window));
+        app->framebufferResized = true;
+    }
+
     void initWindow()
     {
         glfwInit();
@@ -101,6 +111,8 @@ private:
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
     void initVulkan()
@@ -125,6 +137,15 @@ private:
 
     void recreateSwapChain()
     {
+        int width = 0,
+            height = 0;
+        glfwGetFramebufferSize(window, &width, &height);
+        while (width == 0 || height == 0)
+        {
+            glfwGetFramebufferSize(window, &width, &height);
+            glfwWaitEvents();
+        }
+
         vkDeviceWaitIdle(device);
 
         cleanupSwapChain();
@@ -137,13 +158,13 @@ private:
     void drawFrame()
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
-        vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
         {
+            framebufferResized = false;
             recreateSwapChain();
             return;
         }
@@ -151,6 +172,7 @@ private:
         {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
+        vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
         recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
