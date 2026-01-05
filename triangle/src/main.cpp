@@ -12,6 +12,7 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
+#include <glm/glm.hpp>
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -85,8 +86,19 @@ private:
         }
     };
 
-    const std::vector<const char *> deviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    struct Vertex
+    {
+        glm::vec2 pos;
+        glm::vec3 color;
+    };
+
+    const std::vector<Vertex> vertices = {
+        {{0.0f, -0.05f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
+    const std::vector<const char *>
+        deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     struct SwapChainSupportDetails
     {
