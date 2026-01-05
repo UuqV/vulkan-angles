@@ -75,6 +75,7 @@ private:
     uint32_t currentFrame = 0;
 
     VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
 
     bool framebufferResized = false;
 
@@ -156,6 +157,28 @@ private:
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
+    void cleanup()
+    {
+        cleanupSwapChain();
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device, inFlightFences[i], nullptr);
+        }
+        vkDestroyCommandPool(device, commandPool, nullptr);
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        vkDestroyDevice(device, nullptr);
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyInstance(instance, nullptr);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
+
     void initVulkan()
     {
         if (enableValidationLayers && !checkValidationLayerSupport())
@@ -210,6 +233,18 @@ private:
 
         VkMemoryRequirements memRequirements;
         vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate vertex buffer memory!");
+        };
+
+        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
     }
 
     void recreateSwapChain()
@@ -1083,27 +1118,6 @@ private:
             vkDestroyImageView(device, imageView, nullptr);
         }
         vkDestroySwapchainKHR(device, swapChain, nullptr);
-    }
-
-    void cleanup()
-    {
-        cleanupSwapChain();
-        vkDestroyBuffer(device, vertexBuffer, nullptr);
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(device, inFlightFences[i], nullptr);
-        }
-        vkDestroyCommandPool(device, commandPool, nullptr);
-        vkDestroyPipeline(device, graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-        vkDestroyRenderPass(device, renderPass, nullptr);
-        vkDestroyDevice(device, nullptr);
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-        vkDestroyInstance(instance, nullptr);
-        glfwDestroyWindow(window);
-        glfwTerminate();
     }
 };
 
