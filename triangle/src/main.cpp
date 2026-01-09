@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
+#include "stb_image.h"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -232,6 +233,7 @@ private:
         createGraphicsPipeline();
         createFrameBuffers();
         createCommandPool();
+        createTextureImage();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -239,6 +241,17 @@ private:
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+    }
+
+    void createTextureImage()
+    {
+        int texWidth, texHeight, texChannels;
+        stbi_uc *pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        VkDeviceSize imageSize = texWidth * texHeight * 4;
+        if (!pixels)
+        {
+            throw std::runtime_error("failed to load texture image!");
+        }
     }
 
     void createDescriptorSets()
