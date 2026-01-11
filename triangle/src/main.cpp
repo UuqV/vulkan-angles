@@ -251,6 +251,7 @@ private:
         createCommandPool();
         createTextureImage();
         createTextureImageView();
+        createTextureSampler();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -300,7 +301,7 @@ private:
 
         if (vkCreateImageView(device, &createInfo, nullptr, &textureImageView) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create image views!");
+            throw std::runtime_error("failed to create texture image view!");
         }
     }
 
@@ -524,8 +525,6 @@ private:
             descriptorWrites[0].descriptorCount = 1;
 
             descriptorWrites[0].pBufferInfo = &bufferInfo;
-            descriptorWrites[0].pImageInfo = nullptr;
-            descriptorWrites[0].pTexelBufferView = nullptr;
 
             descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet = descriptorSets[i];
@@ -534,9 +533,7 @@ private:
 
             descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             descriptorWrites[1].descriptorCount = 1;
-
             descriptorWrites[1].pImageInfo = &imageInfo;
-            descriptorWrites[1].pTexelBufferView = nullptr;
 
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
