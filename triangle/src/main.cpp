@@ -297,6 +297,11 @@ private:
     void createTextureImageView()
     {
         VkImageViewCreateInfo createInfo = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+
+        if (vkCreateImageView(device, &createInfo, nullptr, &textureImageView) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create image views!");
+        }
     }
 
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
@@ -1150,7 +1155,7 @@ private:
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+        viewInfo.format = format;
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
