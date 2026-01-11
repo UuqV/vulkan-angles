@@ -124,6 +124,7 @@ private:
     {
         glm::vec2 pos;
         glm::vec3 color;
+        glm::vec2 texCoord;
 
         static VkVertexInputBindingDescription getBindingDescription()
         {
@@ -150,6 +151,11 @@ private:
             attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
             attributeDescriptions[1].offset = offsetof(Vertex, color);
 
+            attributeDescriptions[2].binding = 0;
+            attributeDescriptions[2].location = 2;
+            attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+            attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
             return attributeDescriptions;
         }
     };
@@ -158,10 +164,10 @@ private:
         0, 1, 2, 2, 3, 0};
 
     const std::vector<Vertex> vertices = {
-        {{-1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}},
-        {{1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}};
+        {{-1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
 
     const std::vector<const char *>
         deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
