@@ -317,7 +317,7 @@ private:
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel = 0;
         region.imageSubresource.baseArrayLayer = 0;
-        region.imageSubresource.layerCount = 1;
+        region.imageSubresource.layerCount = 6;
 
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {
@@ -345,7 +345,7 @@ private:
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.layerCount = 6;
 
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = 0;
@@ -454,7 +454,7 @@ private:
         imageInfo.extent.height = static_cast<uint32_t>(height);
         imageInfo.extent.depth = 1;
         imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
+        imageInfo.arrayLayers = 6;
         imageInfo.format = format;
         imageInfo.tiling = tiling;
 
@@ -1151,7 +1151,7 @@ private:
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
         viewInfo.format = format;
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
