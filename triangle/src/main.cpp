@@ -28,6 +28,7 @@ class HelloTriangleApplication
 
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
+    const uint32_t CUBESIZE = CUBESIZE;
 
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};
@@ -108,6 +109,11 @@ private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
+
+    VkImage cubeImage;
+    VkImageView cubeView;
+    VkImageView cubeFaceViews[6];
+    VkSampler cubeSampler;
 
     struct QueueFamilyIndices
     {
@@ -247,6 +253,7 @@ private:
         createRenderPass();
         createDescriptorSetLayout();
         createGraphicsPipeline();
+        createCubeMap();
         createFrameBuffers();
         createCommandPool();
         createTextureImage();
@@ -259,6 +266,88 @@ private:
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+    }
+
+    void createCubeMapImage()
+    {
+        VkImageCreateInfo cubeImageInfo{};
+        cubeImageInfo.imageType = VK_IMAGE_TYPE_2D;
+        cubeImageInfo.format = VK_FORMAT_R16G16B16A16_SFLOAT; // or swapchain format
+        cubeImageInfo.extent.width = static_cast<uint32_t>(CUBESIZE);
+        cubeImageInfo.extent.height = static_cast<uint32_t>(CUBESIZE);
+        cubeImageInfo.mipLevels = 1;
+        cubeImageInfo.arrayLayers = 6;
+        cubeImageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        cubeImageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        cubeImageInfo.usage =
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+            VK_IMAGE_USAGE_SAMPLED_BIT;
+        cubeImageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+
+        if (vkCreateImage(device, &cubeImageInfo, nullptr, &cubeImage) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create cube image!");
+        }
+
+        vkBindImageMemory(device, textureImage, textureImageMemory, 0);
+
+        VkImageViewCreateInfo view{};
+        view.image = cubeImage;
+        view.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
+        view.format = cubeImageInfo.format;
+        view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        view.subresourceRange.baseMipLevel = 0;
+        view.subresourceRange.levelCount = 1;
+        view.subresourceRange.baseArrayLayer = 0;
+        view.subresourceRange.layerCount = 6;
+
+        vkCreateImageView(device, &view, nullptr, &cubeView);
+    }
+
+    void createCubeFaces()
+    {
+        for (uint32_t i = 0; i < 6; i++)
+        {
+            VkImageCreateInfo cubeImageInfo{};
+            cubeFaceViews[i].bufferOffset = CUBESIZE * i;
+            cubeFaceViews[i].bufferRowLength = 0;
+            cubeFaceViews[i].bufferImageHeight = 0;
+
+            cubeFaceViews[i].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            cubeFaceViews[i].imageSubresource.mipLevel = 0;
+            cubeFaceViews[i].imageSubresource.baseArrayLayer = i; // face index
+            cubeFaceViews[i].imageSubresource.layerCount = 1;
+
+            cubeFaceViews[i].imageOffset = {0, 0, 0};
+            cubeFaceViews[i].imageExtent = {CUBESIZE, CUBESIZE, 1};
+
+            cubeFaceViews[i] =
+        }
+        vkCmdCopyBufferToImage(
+            cmd,
+            stagingBuffer,
+            cubeImage,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            6,
+            regions.data());
+    }
+
+    void createCubeSampler()
+    {
+        VkSamplerCreateInfo samplerInfo{};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.maxAnisotropy = 1.0f;
+
+        if (vkCreateSampler(device, &samplerInfo, nullptr, &cubeSampler) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create texture sampler!");
+        }
     }
 
     void createTextureSampler()
