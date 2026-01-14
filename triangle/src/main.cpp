@@ -253,12 +253,14 @@ private:
         createRenderPass();
         createDescriptorSetLayout();
         createGraphicsPipeline();
-        createCubeMap();
         createFrameBuffers();
         createCommandPool();
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
+        // createCubeMapImage();
+        createCubeMapImageView();
+        createCubeMapSampler();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -268,7 +270,7 @@ private:
         createSyncObjects();
     }
 
-    void createCubeMapImage()
+    void createCubeMapImageView()
     {
         VkImageCreateInfo cubeImageInfo{};
         cubeImageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -306,25 +308,29 @@ private:
 
     void createCubeFaces()
     {
+
+        VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+        std::vector<VkBufferImageCopy> regions(6);
+
+        VkDeviceSize faceSize = CUBESIZE * CUBESIZE * 4;
+
         for (uint32_t i = 0; i < 6; i++)
         {
-            VkImageCreateInfo cubeImageInfo{};
-            cubeFaceViews[i].bufferOffset = CUBESIZE * i;
-            cubeFaceViews[i].bufferRowLength = 0;
-            cubeFaceViews[i].bufferImageHeight = 0;
+            regions[i].bufferOffset = faceSize * i;
+            regions[i].bufferRowLength = 0;
+            regions[i].bufferImageHeight = 0;
 
-            cubeFaceViews[i].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            cubeFaceViews[i].imageSubresource.mipLevel = 0;
-            cubeFaceViews[i].imageSubresource.baseArrayLayer = i; // face index
-            cubeFaceViews[i].imageSubresource.layerCount = 1;
+            regions[i].imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            regions[i].imageSubresource.mipLevel = 0;
+            regions[i].imageSubresource.baseArrayLayer = i; // face index
+            regions[i].imageSubresource.layerCount = 1;
 
-            cubeFaceViews[i].imageOffset = {0, 0, 0};
-            cubeFaceViews[i].imageExtent = {CUBESIZE, CUBESIZE, 1};
-
-            cubeFaceViews[i] =
+            regions[i].imageOffset = {0, 0, 0};
+            regions[i].imageExtent = {CUBESIZE, CUBESIZE, 1};
         }
+
         vkCmdCopyBufferToImage(
-            cmd,
+            commandBuffer,
             stagingBuffer,
             cubeImage,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -332,7 +338,7 @@ private:
             regions.data());
     }
 
-    void createCubeSampler()
+    void createCubeMapSampler()
     {
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
