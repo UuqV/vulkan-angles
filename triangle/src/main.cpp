@@ -20,6 +20,7 @@
 #include <fstream>
 #include <array>
 #include "stb_image.h"
+#include "Vertex.cpp"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
