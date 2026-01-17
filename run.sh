@@ -1,3 +1,4 @@
+cd "./triangle"
 ./compile.sh
 cmake --build build
 cd "$(dirname "$0")/build/bin"
