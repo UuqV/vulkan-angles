@@ -1,6 +1,3 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,15 +18,12 @@
 #include <array>
 #include "stb_image.h"
 #include "Vertex.cpp"
+#include "window.cpp"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
 class HelloTriangleApplication
 {
-
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
-
     const std::vector<const char *> validationLayers = {
         "VK_LAYER_KHRONOS_validation"};
 
@@ -42,14 +36,13 @@ class HelloTriangleApplication
 public:
     void run()
     {
-        initWindow();
+        initWindow(this);
         initVulkan();
         mainLoop();
         cleanup();
     }
 
 private:
-    GLFWwindow *window;
     VkInstance instance;
 
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -97,8 +90,6 @@ private:
     VkImageView textureImageView;
     VkSampler textureSampler;
 
-    bool framebufferResized = false;
-
     struct UniformBufferObject
     {
         alignas(16) glm::mat4 model;
@@ -133,24 +124,6 @@ private:
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
     };
-
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
-    {
-        auto app = reinterpret_cast<HelloTriangleApplication *>(glfwGetWindowUserPointer(window));
-        app->framebufferResized = true;
-    }
-
-    void initWindow()
-    {
-        glfwInit();
-
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-        glfwSetWindowUserPointer(window, this);
-        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-    }
 
     void cleanup()
     {
