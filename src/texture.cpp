@@ -176,3 +176,10 @@ void createTextureSampler()
         throw std::runtime_error("failed to create texture sampler!");
     }
 }
+
+void initTexture()
+{
+    createTextureImage();
+    createTextureImageView();
+    createTextureSampler();
+}

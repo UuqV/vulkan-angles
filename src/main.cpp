@@ -76,9 +76,7 @@ private:
         createGraphicsPipeline();
         createFrameBuffers();
         createCommandPool();
-        createTextureImage();
-        createTextureImageView();
-        createTextureSampler();
+        initTexture();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
