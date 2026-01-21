@@ -65,9 +65,7 @@ private:
         {
             throw std::runtime_error("validationlayers requested, but not available!");
         }
-        createInstance();
-        createSurface();
-        pickPhysicalDevice();
+        initEnvironment();
         createLogicalDevice();
         createSwapChain();
         createImageViews();

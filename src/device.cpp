@@ -222,3 +222,10 @@ uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 
     throw std::runtime_error("failed to find suitable memory type!");
 }
+
+void initEnvironment()
+{
+    createInstance();
+    createSurface();
+    pickPhysicalDevice();
+}
