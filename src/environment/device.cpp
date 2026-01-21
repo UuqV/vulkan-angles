@@ -223,6 +223,15 @@ uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
+void cleanupEnvironment()
+{
+    vkDestroyDevice(device, nullptr);
+    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
 void initEnvironment()
 {
     createInstance();
