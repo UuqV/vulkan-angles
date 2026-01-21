@@ -7,6 +7,9 @@
 #include "descriptorsetlayout.cpp"
 #include "file.cpp"
 
+VkPipelineLayout pipelineLayout;
+VkPipeline graphicsPipeline;
+
 VkShaderModule createShaderModule(const std::vector<char> &code)
 {
     VkShaderModuleCreateInfo createInfo{};

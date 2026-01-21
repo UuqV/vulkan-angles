@@ -6,7 +6,7 @@
 
 VkRenderPass renderPass;
 
-void createRenderPass(VkDevice device)
+void createRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapChainImageFormat;

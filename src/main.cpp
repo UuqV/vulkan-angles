@@ -24,11 +24,6 @@ public:
     }
 
 private:
-    VkPipeline graphicsPipeline;
-    VkPipelineLayout pipelineLayout;
-
-    uint32_t currentFrame = 0;
-
     void cleanup()
     {
         cleanupSwapChain();

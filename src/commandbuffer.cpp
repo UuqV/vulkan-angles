@@ -6,6 +6,8 @@
 
 std::vector<VkCommandBuffer> commandBuffers;
 
+uint32_t currentFrame = 0;
+
 void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
