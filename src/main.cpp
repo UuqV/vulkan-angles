@@ -34,8 +34,7 @@ private:
         cleanupVertexBuffer();
         cleanupSyncObjects();
         vkDestroyCommandPool(device, commandPool, nullptr);
-        vkDestroyPipeline(device, graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        cleanupPipeline();
         vkDestroyRenderPass(device, renderPass, nullptr);
         cleanupEnvironment();
     }
