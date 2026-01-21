@@ -13,8 +13,7 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
-#include "stb_image.h"
-#include "texture.cpp"
+#include "textures/texture.cpp"
 
 VkBuffer vertexBuffer;
 VkDeviceMemory vertexBufferMemory;

@@ -4,7 +4,7 @@ project(vk_app LANGUAGES CXX)
 
 add_executable(vk_app
     src/main.cpp
-    src/image.cpp
+    src/textures/image_loader.cpp
 )
 
 target_compile_features(vk_app PUBLIC cxx_std_17)

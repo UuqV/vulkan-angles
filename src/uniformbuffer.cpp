@@ -8,7 +8,6 @@
 #include <cstring>
 #include <cstdint>
 #include <array>
-#include "stb_image.h"
 #include "indexbuffer.cpp"
 
 std::vector<VkBuffer> uniformBuffers;

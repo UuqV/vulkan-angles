@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
-#include "stb_image.h"
 #include "sync.cpp"
 
 class HelloTriangleApplication
