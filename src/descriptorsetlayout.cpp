@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <array>
 #include "renderpass.cpp"
 
 VkDescriptorSetLayout descriptorSetLayout;
