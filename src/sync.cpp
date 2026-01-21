@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "commandbuffer.cpp"
+#include "commands/commandbuffer.cpp"
 
 std::vector<VkSemaphore> imageAvailableSemaphores;
 std::vector<VkSemaphore> renderFinishedSemaphores;

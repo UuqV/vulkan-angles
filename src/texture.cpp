@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "stb_image.h"
-#include "commandpool.cpp"
+#include "commands/commandpool.cpp"
 
 VkImage textureImage;
 VkDeviceMemory textureImageMemory;

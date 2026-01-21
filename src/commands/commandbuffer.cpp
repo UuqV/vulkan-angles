@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "descriptorset.cpp"
+#include "../descriptors/descriptorset.cpp"
 
 std::vector<VkCommandBuffer> commandBuffers;
 
