@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "pipeline.cpp"
+#include "../pipeline.cpp"
 
 void createFrameBuffers()
 {
