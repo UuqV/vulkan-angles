@@ -8,7 +8,7 @@ void createFrameBuffers()
 {
 
     // Framebuffer for your existing pass (with depth if you have it)
-    std::array<VkImageView, 2> attachments = {offscreenImageView};
+    std::array<VkImageView, 1> attachments = {offscreenImageView};
 
     VkFramebufferCreateInfo fbInfo{};
     fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
