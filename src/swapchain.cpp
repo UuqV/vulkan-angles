@@ -7,6 +7,8 @@
 #include <algorithm>
 #include "environment/device.cpp"
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 VkSwapchainKHR swapChain;
 std::vector<VkImage> swapChainImages;
 VkFormat swapChainImageFormat;
