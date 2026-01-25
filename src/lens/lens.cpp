@@ -2,9 +2,11 @@
 #include <GLFW/glfw3.h>
 #include "descriptorset.cpp"
 
+// Lens pass resources
+
 void initLens()
 {
-    createOffscreenResources();
+    createImageViews();
     createLensRenderPass();
     createLensDescriptorSetLayout();
     createLensPipeline();

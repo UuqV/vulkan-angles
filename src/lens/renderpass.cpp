@@ -1,6 +1,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include "resources.cpp"
+#include "imageview.cpp"
+
+VkRenderPass lensRenderPass;
 
 void createLensRenderPass()
 {

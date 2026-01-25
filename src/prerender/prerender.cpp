@@ -4,7 +4,7 @@
 
 void initPrerender()
 {
-    createImageViews();
+    createOffscreenResources();
     createRenderPass();
     createDescriptorSetLayout();
     createGraphicsPipeline();

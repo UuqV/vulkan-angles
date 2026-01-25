@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "../lens/lens.cpp"
+#include "../prerender/prerender.cpp"
 
 VkImageViewCreateInfo createImageView(VkImage image, VkFormat format)
 {

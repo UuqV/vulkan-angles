@@ -2,7 +2,9 @@
 #include <GLFW/glfw3.h>
 
 #include "descriptorsetlayout.cpp"
-#include "../environment/file.cpp"
+
+VkPipelineLayout lensPipelineLayout;
+VkPipeline lensPipeline;
 
 VkShaderModule createShaderModule(const std::vector<char> &code)
 {

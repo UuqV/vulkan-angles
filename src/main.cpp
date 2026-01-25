@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
-#include "prerender/prerender.cpp"
+#include "lens/lens.cpp"
 #include "sync.cpp"
 
 class HelloTriangleApplication
@@ -60,8 +60,8 @@ private:
         initEnvironment();
         createLogicalDevice();
         createSwapChain();
-        initLens();
         initPrerender();
+        initLens();
         createSyncObjects();
     }
 
@@ -186,6 +186,12 @@ private:
 
         vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
+        // In drawFrame, before the lens pass:
+        std::cout << "currentFrame: " << currentFrame << std::endl;
+        std::cout << "lensDescriptorSets size: " << lensDescriptorSets.size() << std::endl;
+        std::cout << "swapChainFramebuffers size: " << swapChainFramebuffers.size() << std::endl;
+        std::cout << "imageIndex: " << imageIndex << std::endl;
+
         // === LENS PASS (renders to swapchain) ===
         VkRenderPassBeginInfo lensPassInfo{};
         lensPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -195,6 +201,9 @@ private:
         lensPassInfo.renderArea.extent = swapChainExtent;
 
         vkCmdBeginRenderPass(commandBuffers[currentFrame], &lensPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        std::cout << "here" << std::endl
+                  << std::flush;
 
         vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, lensPipeline);
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -224,7 +233,10 @@ private:
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]);
+        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
 
         // Present (unchanged)
         VkPresentInfoKHR presentInfo{};

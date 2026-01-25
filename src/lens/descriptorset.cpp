@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include "framebuffers.cpp"
 
+VkDescriptorPool lensDescriptorPool;
+std::vector<VkDescriptorSet> lensDescriptorSets;
+
 void createLensDescriptorSets()
 {
     // Pool

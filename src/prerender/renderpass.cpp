@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "imageview.cpp"
+#include "resources.cpp"
 
 VkRenderPass renderPass;
 

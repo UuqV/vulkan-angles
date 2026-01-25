@@ -3,6 +3,8 @@
 
 #include "renderpass.cpp"
 
+VkDescriptorSetLayout lensDescriptorSetLayout;
+
 void createLensDescriptorSetLayout()
 {
     VkDescriptorSetLayoutBinding samplerBinding{};

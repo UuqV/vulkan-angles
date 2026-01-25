@@ -6,6 +6,9 @@
 
 void createLensFrameBuffers()
 {
+    std::cout << "createLensFrameBuffers called" << std::endl;
+    std::cout << "swapChainImageViews size: " << swapChainImageViews.size() << std::endl;
+
     swapChainFramebuffers.resize(swapChainImageViews.size());
     for (size_t i = 0; i < swapChainImageViews.size(); i++)
     {

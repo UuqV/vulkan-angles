@@ -4,14 +4,6 @@
 #include <vector>
 #include "../swapchain.cpp"
 
-// Lens pass resources
-VkRenderPass lensRenderPass;
-VkPipelineLayout lensPipelineLayout;
-VkPipeline lensPipeline;
-VkDescriptorSetLayout lensDescriptorSetLayout;
-VkDescriptorPool lensDescriptorPool;
-std::vector<VkDescriptorSet> lensDescriptorSets;
-
 // Offscreen target (your existing pass renders here instead of swapchain)
 VkImage offscreenImage;
 VkDeviceMemory offscreenImageMemory;
