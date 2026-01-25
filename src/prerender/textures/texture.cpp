@@ -115,7 +115,7 @@ void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling
 void createTextureImage()
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc *pixels = stbi_load("../../src/textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc *pixels = stbi_load("../../src/prerender/textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
     if (!pixels)
     {

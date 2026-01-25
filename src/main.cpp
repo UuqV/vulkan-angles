@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <array>
+#include "prerender/prerender.cpp"
 #include "sync.cpp"
 
 class HelloTriangleApplication
@@ -48,19 +49,7 @@ private:
         initEnvironment();
         createLogicalDevice();
         createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDescriptorSetLayout();
-        createGraphicsPipeline();
-        createFrameBuffers();
-        createCommandPool();
-        initTexture();
-        createVertexBuffer();
-        createIndexBuffer();
-        createUniformBuffers();
-        createDescriptorPool();
-        createDescriptorSets();
-        createCommandBuffers();
+        initPrerender();
         createSyncObjects();
     }
 
