@@ -26,7 +26,7 @@ public:
 private:
     void cleanup()
     {
-
+        vkDeviceWaitIdle(device);
         vkDestroyPipeline(device, lensPipeline, nullptr);
         vkDestroyPipelineLayout(device, lensPipelineLayout, nullptr);
         vkDestroyRenderPass(device, lensRenderPass, nullptr);
