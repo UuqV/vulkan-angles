@@ -22,8 +22,8 @@ VkShaderModule createShaderModule(const std::vector<char> &code)
 
 void createLensPipeline()
 {
-    auto vertCode = readFile("shaders/lens_vert.spv");
-    auto fragCode = readFile("shaders/lens_frag.spv");
+    auto vertCode = readFile("lens_vert.spv");
+    auto fragCode = readFile("lens_frag.spv");
 
     VkShaderModule vertModule = createShaderModule(vertCode);
     VkShaderModule fragModule = createShaderModule(fragCode);
