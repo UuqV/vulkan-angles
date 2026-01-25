@@ -3,6 +3,7 @@
 
 #include "../../environment/stb_image.h"
 #include "../../commands/commandpool.cpp"
+#include "../../environment/imageview.cpp"
 
 VkImage textureImage;
 VkDeviceMemory textureImageMemory;
