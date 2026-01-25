@@ -6,24 +6,18 @@
 
 void createFrameBuffers()
 {
-    swapChainFramebuffers.resize(swapChainImageViews.size());
-    for (size_t i = 0; i < swapChainImageViews.size(); i++)
-    {
-        VkImageView attachments[] = {
-            swapChainImageViews[i]};
 
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = swapChainExtent.width;
-        framebufferInfo.height = swapChainExtent.height;
-        framebufferInfo.layers = 1;
+    // Framebuffer for your existing pass (with depth if you have it)
+    std::array<VkImageView, 2> attachments = {offscreenImageView};
 
-        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create fraembuffer!");
-        }
-    }
+    VkFramebufferCreateInfo fbInfo{};
+    fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbInfo.renderPass = renderPass; // Your existing render pass
+    fbInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    fbInfo.pAttachments = attachments.data();
+    fbInfo.width = swapChainExtent.width;
+    fbInfo.height = swapChainExtent.height;
+    fbInfo.layers = 1;
+
+    vkCreateFramebuffer(device, &fbInfo, nullptr, &offscreenFramebuffer);
 }

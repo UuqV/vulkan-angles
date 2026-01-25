@@ -10,7 +10,6 @@
 #include <fstream>
 #include <array>
 #include "prerender/prerender.cpp"
-#include "lens/lens.cpp"
 #include "sync.cpp"
 
 class HelloTriangleApplication

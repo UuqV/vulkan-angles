@@ -8,5 +8,6 @@ void initLens()
     createLensRenderPass();
     createLensDescriptorSetLayout();
     createLensPipeline();
+    createLensFrameBuffers();
     createLensDescriptorSets();
 }

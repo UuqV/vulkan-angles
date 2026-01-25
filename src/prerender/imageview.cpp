@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "../swapchain.cpp"
+#include "../lens/lens.cpp"
 
 VkImageViewCreateInfo createImageView(VkImage image, VkFormat format)
 {
