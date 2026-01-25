@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "swapchain.cpp"
+#include "../swapchain.cpp"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 

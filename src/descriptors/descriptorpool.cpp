@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "../buffers/uniformbuffer.cpp"
+#include "../prerender/buffers/uniformbuffer.cpp"
 
 void createDescriptorPool()
 {

@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdexcept>
-#include "../buffers/framebuffers.cpp"
+#include "../prerender/buffers/framebuffers.cpp"
 
 VkCommandPool commandPool;
 

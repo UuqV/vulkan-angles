@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <array>
-#include "../renderpass.cpp"
+#include "../prerender/renderpass.cpp"
 
 VkDescriptorSetLayout descriptorSetLayout;
 VkDescriptorPool descriptorPool;
