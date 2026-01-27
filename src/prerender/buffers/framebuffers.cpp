@@ -15,8 +15,8 @@ void createFrameBuffers()
     fbInfo.renderPass = renderPass; // Your existing render pass
     fbInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     fbInfo.pAttachments = attachments.data();
-    fbInfo.width = swapChainExtent.width;
-    fbInfo.height = swapChainExtent.height;
+    fbInfo.width = OFFSCREEN_WIDTH;
+    fbInfo.height = OFFSCREEN_HEIGHT;
     fbInfo.layers = 1;
 
     vkCreateFramebuffer(device, &fbInfo, nullptr, &offscreenFramebuffer);

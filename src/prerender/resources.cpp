@@ -11,13 +11,16 @@ VkImageView offscreenImageView;
 VkFramebuffer offscreenFramebuffer;
 VkSampler offscreenSampler;
 
+const uint32_t OFFSCREEN_WIDTH = WIDTH * 1.5;
+const uint32_t OFFSCREEN_HEIGHT = HEIGHT * 1.5;
+
 void createOffscreenResources()
 {
     // Image
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent = {swapChainExtent.width, swapChainExtent.height, 1};
+    imageInfo.extent = {OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT, 1};
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
     imageInfo.format = swapChainImageFormat;

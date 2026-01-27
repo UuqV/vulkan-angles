@@ -11,6 +11,8 @@ layout(push_constant) uniform LensParams {
     float centerY;
 } lens;
 
+const float renderScale = 2.25;
+
 void main() {
     vec2 center = vec2(lens.centerX, lens.centerY);
     vec2 coord = fragTexCoord - center;
@@ -19,7 +21,13 @@ void main() {
     float r4 = r2 * r2;
     float distortion = 1.0 + lens.k1 * r2 + lens.k2 * r4;
     
-    vec2 distorted = center + coord * distortion;
+    vec2 distorted = coord * distortion;
+    
+    // Map to center region of larger render target
+    // The center of the offscreen is at 0.5, 0.5
+    // We want to sample a 1/renderScale sized region from the center
+    float offset = (1.0 - 1.0 / renderScale) * 0.5;
+    distorted = distorted / renderScale + center / renderScale + offset;
     
     if (distorted.x < 0.0 || distorted.x > 1.0 || 
         distorted.y < 0.0 || distorted.y > 1.0) {

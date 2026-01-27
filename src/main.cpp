@@ -74,8 +74,8 @@ private:
 
         UniformBufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+        ubo.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.45f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = glm::perspective(glm::radians(45.0f), OFFSCREEN_WIDTH / (float)OFFSCREEN_HEIGHT, 0.1f, 100.0f);
         ubo.proj[1][1] *= -1;
 
         memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -172,7 +172,7 @@ private:
         renderPassInfo.renderArea.extent = swapChainExtent;
 
         std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[0].color = {{0.5f, 0.5f, 0.5f, 1.0f}};
         clearValues[1].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
@@ -184,15 +184,15 @@ private:
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(swapChainExtent.width);
-        viewport.height = static_cast<float>(swapChainExtent.height);
+        viewport.width = static_cast<float>(OFFSCREEN_WIDTH);
+        viewport.height = static_cast<float>(OFFSCREEN_HEIGHT);
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
-        scissor.extent = swapChainExtent;
+        scissor.extent = {OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT};
         vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
 
         VkBuffer vertexBuffers[] = {vertexBuffer};
@@ -253,8 +253,12 @@ private:
 
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 lensPipelineLayout, 0, 1, &lensDescriptorSets[currentFrame], 0, nullptr);
-
-        float lensParams[4] = {0.0f, 0.0f, 0.5f, 0.5f}; // No distortion for testing
+        float lensParams[4] = {
+            3.14f, // fov: pi radians = 180 degrees
+            1.0f,  // strength: 1.0 = full fisheye
+            0.33f, // centerX
+            0.33f  // centerY
+        };
         vkCmdPushConstants(commandBuffers[currentFrame], lensPipelineLayout,
                            VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(lensParams), lensParams);
 
