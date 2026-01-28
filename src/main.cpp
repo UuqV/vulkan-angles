@@ -74,8 +74,8 @@ private:
 
         UniformBufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.45f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(45.0f), OFFSCREEN_WIDTH / (float)OFFSCREEN_HEIGHT, 0.01f, 10.0f);
+        ubo.view = glm::lookAt(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = glm::perspective(glm::radians(150.0f), OFFSCREEN_WIDTH / (float)OFFSCREEN_HEIGHT, 0.01f, 10.0f);
         ubo.proj[1][1] *= -1;
 
         memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -254,10 +254,10 @@ private:
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 lensPipelineLayout, 0, 1, &lensDescriptorSets[currentFrame], 0, nullptr);
         float lensParams[4] = {
-            3.14f, // fov: pi radians = 180 degrees
-            1.0f,  // strength: 1.0 = full fisheye
-            0.33f, // centerX
-            0.33f  // centerY
+            3.0f, // fov: pi radians = 180 degrees
+            1.0f, // strength: 1.0 = full fisheye
+            0.5f, // centerX
+            0.5f  // centerY
         };
         vkCmdPushConstants(commandBuffers[currentFrame], lensPipelineLayout,
                            VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(lensParams), lensParams);

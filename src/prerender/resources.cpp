@@ -11,8 +11,8 @@ VkImageView offscreenImageView;
 VkFramebuffer offscreenFramebuffer;
 VkSampler offscreenSampler;
 
-const uint32_t OFFSCREEN_WIDTH = WIDTH * 1.5;
-const uint32_t OFFSCREEN_HEIGHT = HEIGHT * 1.5;
+const uint32_t OFFSCREEN_WIDTH = WIDTH;
+const uint32_t OFFSCREEN_HEIGHT = HEIGHT;
 
 void createOffscreenResources()
 {

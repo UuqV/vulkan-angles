@@ -11,7 +11,7 @@ layout(push_constant) uniform LensParams {
     float centerY;
 } lens;
 
-const float renderScale = 2.25;
+const float renderScale = 1.0;
 
 void main() {
     vec2 center = vec2(lens.centerX, lens.centerY);
