@@ -75,7 +75,7 @@ private:
         UniformBufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ubo.view = glm::lookAt(glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(150.0f), OFFSCREEN_WIDTH / (float)OFFSCREEN_HEIGHT, 0.01f, 10.0f);
+        ubo.proj = glm::perspective(glm::radians(120.0f), OFFSCREEN_WIDTH / (float)OFFSCREEN_HEIGHT, 0.01f, 10.0f);
         ubo.proj[1][1] *= -1;
 
         memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -169,11 +169,10 @@ private:
         renderPassInfo.renderPass = renderPass;
         renderPassInfo.framebuffer = offscreenFramebuffer;
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = swapChainExtent;
+        renderPassInfo.renderArea.extent = {OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT};
 
         std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color = {{0.5f, 0.5f, 0.5f, 1.0f}};
-        clearValues[1].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
 
@@ -247,9 +246,23 @@ private:
 
         vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, lensPipeline);
 
+        VkViewport lensViewport{};
+        lensViewport.x = 0.0f;
+        lensViewport.y = 0.0f;
+        lensViewport.width = static_cast<float>(swapChainExtent.width);   // Screen size
+        lensViewport.height = static_cast<float>(swapChainExtent.height); // Screen size
+        lensViewport.minDepth = 0.0f;
+        lensViewport.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &lensViewport);
+
+        VkRect2D lensScissor{};
+        lensScissor.offset = {0, 0};
+        lensScissor.extent = swapChainExtent; // Screen size
+        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &lensScissor);
+
         // Set viewport and scissor for lens pass too
-        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
-        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &lensViewport);
+        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &lensScissor);
 
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 lensPipelineLayout, 0, 1, &lensDescriptorSets[currentFrame], 0, nullptr);
