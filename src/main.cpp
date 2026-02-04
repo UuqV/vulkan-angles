@@ -32,11 +32,10 @@ private:
         vkDestroyRenderPass(device, lensRenderPass, nullptr);
         vkDestroyDescriptorPool(device, lensDescriptorPool, nullptr);
         vkDestroyDescriptorSetLayout(device, lensDescriptorSetLayout, nullptr);
-        vkDestroySampler(device, offscreenSampler, nullptr);
-        vkDestroyFramebuffer(device, offscreenFramebuffer, nullptr);
-        vkDestroyImageView(device, offscreenImageView, nullptr);
-        vkDestroyImage(device, offscreenImage, nullptr);
-        vkFreeMemory(device, offscreenImageMemory, nullptr);
+        vkDestroySampler(device, cubemapSampler, nullptr);
+        vkDestroyImageView(device, cubemapImageView, nullptr);
+        vkDestroyImage(device, cubemapImage, nullptr);
+        vkFreeMemory(device, cubemapImageMemory, nullptr);
         cleanupSwapChain();
         cleanupTexture();
         cleanupUniformBuffers();
@@ -81,36 +80,6 @@ private:
         memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }
 
-    void recreateSwapChain()
-    {
-        int width = 0,
-            height = 0;
-        glfwGetFramebufferSize(window, &width, &height);
-        while (width == 0 || height == 0)
-        {
-            glfwGetFramebufferSize(window, &width, &height);
-            glfwWaitEvents();
-        }
-
-        vkDeviceWaitIdle(device);
-
-        cleanupSwapChain();
-
-        createSwapChain();
-        createImageViews();
-        createFrameBuffers();
-
-        // Recreate offscreen resources at new size
-        vkDestroyFramebuffer(device, offscreenFramebuffer, nullptr);
-        vkDestroyImageView(device, offscreenImageView, nullptr);
-        vkDestroyImage(device, offscreenImage, nullptr);
-        vkFreeMemory(device, offscreenImageMemory, nullptr);
-        createOffscreenResources();
-
-        // Update descriptor sets with new image view
-        createLensDescriptorSets();
-    }
-
     bool checkValidationLayerSupport()
     {
         uint32_t layerCount;
@@ -140,6 +109,26 @@ private:
         return true;
     }
 
+    glm::mat4 getCubemapViewMatrix(uint32_t face, glm::vec3 pos)
+    {
+        // For Z-up coordinate system
+        switch (face)
+        {
+        case 0:
+            return glm::lookAt(pos, pos + glm::vec3(1, 0, 0), glm::vec3(0, 0, 1)); // +X
+        case 1:
+            return glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1)); // -X
+        case 2:
+            return glm::lookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)); // +Y
+        case 3:
+            return glm::lookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1)); // -Y
+        case 4:
+            return glm::lookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)); // +Z (up)
+        case 5:
+            return glm::lookAt(pos, pos + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0)); // -Z (down)
+        }
+        return glm::mat4(1.0f);
+    }
     void drawFrame()
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -151,11 +140,13 @@ private:
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
         {
             framebufferResized = false;
-            recreateSwapChain();
+            // recreateSwapChain();
             return;
         }
 
-        updateUniformBuffer(currentFrame);
+        std::cout << "here" << std::endl
+                  << std::flush;
+
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
@@ -163,60 +154,89 @@ private:
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo);
 
-        // === SCENE PASS (renders to offscreen) ===
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = renderPass;
-        renderPassInfo.framebuffer = offscreenFramebuffer;
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = {OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT};
+        // Camera position
+        glm::vec3 camPos = glm::vec3(2.0f, 2.0f, 1.0f);
 
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {{0.5f, 0.5f, 0.5f, 1.0f}};
-        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassInfo.pClearValues = clearValues.data();
-
-        vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+        // 90° FOV projection for cubemap faces
+        glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
+        proj[1][1] *= -1;
 
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(OFFSCREEN_WIDTH);
-        viewport.height = static_cast<float>(OFFSCREEN_HEIGHT);
+        viewport.width = static_cast<float>(CUBEMAP_SIZE);
+        viewport.height = static_cast<float>(CUBEMAP_SIZE);
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
-        scissor.extent = {OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT};
-        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+        scissor.extent = {CUBEMAP_SIZE, CUBEMAP_SIZE};
 
-        VkBuffer vertexBuffers[] = {vertexBuffer};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-        vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        VkClearValue clearValue{};
+        clearValue.color = {{0.1f, 0.1f, 0.1f, 1.0f}};
 
-        vkCmdEndRenderPass(commandBuffers[currentFrame]);
+        // === RENDER 6 CUBEMAP FACES ===
+        for (uint32_t face = 0; face < 6; face++)
+        {
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = renderPass;
+            renderPassInfo.framebuffer = cubemapFramebuffers[face];
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = {CUBEMAP_SIZE, CUBEMAP_SIZE};
+            renderPassInfo.clearValueCount = 1;
+            renderPassInfo.pClearValues = &clearValue;
 
-        // Barrier: ensure offscreen writes complete before fragment shader reads
+            std::cout << "face" << std::endl
+                      << std::flush;
+
+            vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+            vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+
+            // Update UBO for this face
+            UniformBufferObject ubo{};
+
+            static auto startTime = std::chrono::high_resolution_clock::now();
+
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+            ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            ubo.view = getCubemapViewMatrix(face, camPos);
+            ubo.proj = proj;
+
+            void *data;
+            vkMapMemory(device, uniformBuffersMemory[currentFrame], 0, sizeof(ubo), 0, &data);
+            memcpy(data, &ubo, sizeof(ubo));
+            vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
+
+            VkBuffer vertexBuffers[] = {vertexBuffer};
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+            vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+            vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+            vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+            vkCmdEndRenderPass(commandBuffers[currentFrame]);
+        }
+
+        // Barrier: transition cubemap to shader read
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.image = offscreenImage;
+        barrier.image = cubemapImage;
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.layerCount = 6;
         barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
@@ -229,7 +249,7 @@ private:
             0, nullptr,
             1, &barrier);
 
-        // === LENS PASS (renders to swapchain) ===
+        // === LENS PASS ===
         VkRenderPassBeginInfo lensPassInfo{};
         lensPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         lensPassInfo.renderPass = lensRenderPass;
@@ -238,7 +258,7 @@ private:
         lensPassInfo.renderArea.extent = swapChainExtent;
 
         VkClearValue lensClear{};
-        lensClear.color = {{1.0f, 0.0f, 1.0f, 1.0f}};
+        lensClear.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         lensPassInfo.clearValueCount = 1;
         lensPassInfo.pClearValues = &lensClear;
 
@@ -247,31 +267,20 @@ private:
         vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, lensPipeline);
 
         VkViewport lensViewport{};
-        lensViewport.x = 0.0f;
-        lensViewport.y = 0.0f;
-        lensViewport.width = static_cast<float>(swapChainExtent.width);   // Screen size
-        lensViewport.height = static_cast<float>(swapChainExtent.height); // Screen size
+        lensViewport.width = static_cast<float>(swapChainExtent.width);
+        lensViewport.height = static_cast<float>(swapChainExtent.height);
         lensViewport.minDepth = 0.0f;
         lensViewport.maxDepth = 1.0f;
         vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &lensViewport);
 
         VkRect2D lensScissor{};
-        lensScissor.offset = {0, 0};
-        lensScissor.extent = swapChainExtent; // Screen size
-        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &lensScissor);
-
-        // Set viewport and scissor for lens pass too
-        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &lensViewport);
+        lensScissor.extent = swapChainExtent;
         vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &lensScissor);
 
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 lensPipelineLayout, 0, 1, &lensDescriptorSets[currentFrame], 0, nullptr);
-        float lensParams[4] = {
-            3.0f, // fov: pi radians = 180 degrees
-            1.0f, // strength: 1.0 = full fisheye
-            0.5f, // centerX
-            0.5f  // centerY
-        };
+
+        float lensParams[4] = {3.14159f, 0.0f, 0.5f, 0.5f}; // FOV in radians, unused, centerX, centerY
         vkCmdPushConstants(commandBuffers[currentFrame], lensPipelineLayout,
                            VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(lensParams), lensParams);
 
@@ -280,7 +289,7 @@ private:
         vkCmdEndRenderPass(commandBuffers[currentFrame]);
         vkEndCommandBuffer(commandBuffers[currentFrame]);
 
-        // Submit
+        // Submit and present (same as before)
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
@@ -295,12 +304,8 @@ private:
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to submit draw command buffer!");
-        }
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]);
 
-        // Present
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
@@ -310,12 +315,7 @@ private:
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
 
-        result = vkQueuePresentKHR(presentQueue, &presentInfo);
-
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-        {
-            recreateSwapChain();
-        }
+        vkQueuePresentKHR(presentQueue, &presentInfo);
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }

@@ -4,7 +4,7 @@
 
 void initPrerender()
 {
-    createOffscreenResources();
+    createCubemapResources();
     createRenderPass();
     createDescriptorSetLayout();
     createGraphicsPipeline();

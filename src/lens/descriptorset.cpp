@@ -34,18 +34,18 @@ void createLensDescriptorSets()
     lensDescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
     vkAllocateDescriptorSets(device, &allocInfo, lensDescriptorSets.data());
 
-    // Write descriptor - all frames use same offscreen image
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         VkDescriptorImageInfo imageInfo{};
-        imageInfo.sampler = offscreenSampler;
-        imageInfo.imageView = offscreenImageView;
+        imageInfo.sampler = cubemapSampler;
+        imageInfo.imageView = cubemapImageView; // The cube view, not a face
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.dstSet = lensDescriptorSets[i];
         write.dstBinding = 0;
+        write.dstArrayElement = 0;
         write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         write.descriptorCount = 1;
         write.pImageInfo = &imageInfo;
