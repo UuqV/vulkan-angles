@@ -71,6 +71,15 @@ void createLensPipeline()
     pushConstant.offset = 0;
     pushConstant.size = sizeof(float) * 4; // k1, k2, centerX, centerY
 
+    std::vector<VkDynamicState> dynamicStates = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR};
+
+    VkPipelineDynamicStateCreateInfo dynamicState{};
+    dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+    dynamicState.pDynamicStates = dynamicStates.data();
+
     VkPipelineLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     layoutInfo.setLayoutCount = 1;
@@ -93,6 +102,7 @@ void createLensPipeline()
     pipelineInfo.layout = lensPipelineLayout;
     pipelineInfo.renderPass = lensRenderPass;
     pipelineInfo.subpass = 0;
+    pipelineInfo.pDynamicState = &dynamicState;
 
     vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &lensPipeline);
 
