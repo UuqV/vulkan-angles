@@ -4,12 +4,12 @@
 
 void initPrerender()
 {
+    createCommandPool();
     createCubemapResources();
     createRenderPass();
     createDescriptorSetLayout();
     createGraphicsPipeline();
     createFrameBuffers();
-    createCommandPool();
     initTexture();
     createVertexBuffer();
     createIndexBuffer();

@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
-#include "../swapchain.cpp"
+#include "../commands/commandpool.cpp"
 
 const uint32_t OFFSCREEN_WIDTH = WIDTH * 2.0;
 const uint32_t OFFSCREEN_HEIGHT = HEIGHT * 2.0;
@@ -19,6 +19,7 @@ const uint32_t CUBEMAP_SIZE = 1024; // Each face resolution
 
 void createCubemapResources()
 {
+
     // Create cubemap image
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -92,4 +93,28 @@ void createCubemapResources()
     samplerInfo.maxAnisotropy = 16.0f;
 
     vkCreateSampler(device, &samplerInfo, nullptr, &cubemapSampler);
+
+    VkCommandBuffer cmd = beginSingleTimeCommands();
+
+    VkImageMemoryBarrier initBarrier{};
+    initBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    initBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    initBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    initBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    initBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    initBarrier.image = cubemapImage;
+    initBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    initBarrier.subresourceRange.baseMipLevel = 0;
+    initBarrier.subresourceRange.levelCount = 1;
+    initBarrier.subresourceRange.baseArrayLayer = 0;
+    initBarrier.subresourceRange.layerCount = 6;
+    initBarrier.srcAccessMask = 0;
+    initBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(cmd,
+                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         0, 0, nullptr, 0, nullptr, 1, &initBarrier);
+
+    endSingleTimeCommands(cmd);
 }

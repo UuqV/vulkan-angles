@@ -13,6 +13,7 @@
 std::vector<VkBuffer> uniformBuffers;
 std::vector<VkDeviceMemory> uniformBuffersMemory;
 std::vector<void *> uniformBuffersMapped;
+VkDeviceSize dynamicAlignment;
 
 struct UniformBufferObject
 {
@@ -21,9 +22,27 @@ struct UniformBufferObject
     alignas(16) glm::mat4 proj;
 };
 
+VkDeviceSize queryUBOAlignment()
+{
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(physicalDevice, &props);
+    VkDeviceSize minAlignment = props.limits.minUniformBufferOffsetAlignment;
+
+    std::cout << "minUniformBufferOffsetAlignment: "
+              << props.limits.minUniformBufferOffsetAlignment << std::endl;
+
+    VkDeviceSize dynamicAlignment = sizeof(UniformBufferObject);
+    if (minAlignment > 0)
+    {
+        dynamicAlignment = (dynamicAlignment + minAlignment - 1) & ~(minAlignment - 1);
+    }
+    return dynamicAlignment;
+}
+
 void createUniformBuffers()
 {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    dynamicAlignment = queryUBOAlignment();
+    VkDeviceSize bufferSize = dynamicAlignment * 6;
 
     uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
@@ -31,7 +50,9 @@ void createUniformBuffers()
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                     uniformBuffers[i], uniformBuffersMemory[i]);
     }
 }
 

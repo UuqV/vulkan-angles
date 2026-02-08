@@ -38,7 +38,7 @@ void createDescriptorSets()
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
 
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         descriptorWrites[0].descriptorCount = 1;
 
         descriptorWrites[0].pBufferInfo = &bufferInfo;

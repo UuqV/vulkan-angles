@@ -152,7 +152,7 @@ private:
         vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo);
 
         // Camera position
-        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
         // 90° FOV projection for cubemap faces
         glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
@@ -172,8 +172,33 @@ private:
 
         VkClearValue clearValue{};
         clearValue.color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+        // Map the entire buffer once before the loop
+        char *mappedData;
+        vkMapMemory(device, uniformBuffersMemory[currentFrame], 0,
+                    dynamicAlignment * 6, 0, (void **)&mappedData);
 
-        // === RENDER 6 CUBEMAP FACES ===
+        // Write all 6 UBOs upfront
+        for (uint32_t face = 0; face < 6; face++)
+        {
+            UniformBufferObject ubo{};
+
+            static auto startTime = std::chrono::high_resolution_clock::now();
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(
+                             currentTime - startTime)
+                             .count();
+
+            ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f),
+                                    glm::vec3(0.0f, 0.0f, 1.0f));
+            ubo.view = getCubemapViewMatrix(face, camPos);
+            ubo.proj = proj;
+
+            memcpy(mappedData + face * dynamicAlignment, &ubo, sizeof(ubo));
+        }
+
+        vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
+
+        // Draw loop — bind with dynamic offset per face
         for (uint32_t face = 0; face < 6; face++)
         {
             VkRenderPassBeginInfo renderPassInfo{};
@@ -184,35 +209,29 @@ private:
             renderPassInfo.renderArea.extent = {CUBEMAP_SIZE, CUBEMAP_SIZE};
             renderPassInfo.clearValueCount = 1;
             renderPassInfo.pClearValues = &clearValue;
-            vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo,
+                                 VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+            vkCmdBindPipeline(commandBuffers[currentFrame],
+                              VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
             vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
             vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
 
-            // Update UBO for this face
-            UniformBufferObject ubo{};
-
-            static auto startTime = std::chrono::high_resolution_clock::now();
-
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-            ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            ubo.view = getCubemapViewMatrix(face, camPos);
-            ubo.proj = proj;
-
-            void *data;
-            vkMapMemory(device, uniformBuffersMemory[currentFrame], 0, sizeof(ubo), 0, &data);
-            memcpy(data, &ubo, sizeof(ubo));
-            vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
+            // KEY CHANGE: pass dynamic offset
+            uint32_t dynamicOffset = static_cast<uint32_t>(face * dynamicAlignment);
+            vkCmdBindDescriptorSets(commandBuffers[currentFrame],
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1,
+                                    &descriptorSets[currentFrame],
+                                    1, &dynamicOffset); // <-- was 0, nullptr
 
             VkBuffer vertexBuffers[] = {vertexBuffer};
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-            vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-            vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-            vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+            vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0,
+                                 VK_INDEX_TYPE_UINT16);
+            vkCmdDrawIndexed(commandBuffers[currentFrame],
+                             static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[currentFrame]);
         }
