@@ -108,24 +108,22 @@ private:
 
         return true;
     }
-
     glm::mat4 getCubemapViewMatrix(uint32_t face, glm::vec3 pos)
     {
-        // For Z-up coordinate system
         switch (face)
         {
         case 0:
-            return glm::lookAt(pos, pos + glm::vec3(1, 0, 0), glm::vec3(0, 0, 1)); // +X
+            return glm::lookAt(pos, pos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0)); // +X
         case 1:
-            return glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1)); // -X
+            return glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)); // -X
         case 2:
             return glm::lookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)); // +Y
         case 3:
-            return glm::lookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1)); // -Y
+            return glm::lookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)); // -Y
         case 4:
-            return glm::lookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)); // +Z (up)
+            return glm::lookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)); // +Z
         case 5:
-            return glm::lookAt(pos, pos + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0)); // -Z (down)
+            return glm::lookAt(pos, pos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0)); // -Z
         }
         return glm::mat4(1.0f);
     }
@@ -156,7 +154,6 @@ private:
 
         // 90° FOV projection for cubemap faces
         glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
-        proj[1][1] *= -1;
 
         VkViewport viewport{};
         viewport.x = 0.0f;
