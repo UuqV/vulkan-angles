@@ -117,9 +117,9 @@ private:
         case 1:
             return glm::lookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)); // -X
         case 2:
-            return glm::lookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)); // +Y
+            return glm::lookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)); // +Y
         case 3:
-            return glm::lookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)); // -Y
+            return glm::lookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)); // -Y
         case 4:
             return glm::lookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)); // +Z
         case 5:
@@ -150,10 +150,11 @@ private:
         vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo);
 
         // Camera position
-        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 2.5f);
 
         // 90° FOV projection for cubemap faces
         glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
+        proj[1][1] *= -1;
 
         VkViewport viewport{};
         viewport.x = 0.0f;
