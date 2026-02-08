@@ -144,9 +144,6 @@ private:
             return;
         }
 
-        std::cout << "here" << std::endl
-                  << std::flush;
-
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
@@ -187,10 +184,6 @@ private:
             renderPassInfo.renderArea.extent = {CUBEMAP_SIZE, CUBEMAP_SIZE};
             renderPassInfo.clearValueCount = 1;
             renderPassInfo.pClearValues = &clearValue;
-
-            std::cout << "face" << std::endl
-                      << std::flush;
-
             vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
