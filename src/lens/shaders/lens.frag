@@ -31,7 +31,7 @@ void main() {
     vec3 dir;
     dir.x = sin(theta) * cos(phi);
     dir.y = sin(theta) * sin(phi);
-    dir.z = cos(theta);
+    dir.z = -cos(theta);
     
     outColor = texture(envMap, dir);
 }
