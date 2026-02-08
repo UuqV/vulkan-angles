@@ -152,10 +152,10 @@ private:
         vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo);
 
         // Camera position
-        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, -3.0f);
+        glm::vec3 camPos = glm::vec3(0.0f, 0.0f, -1.0f);
 
         // 90° FOV projection for cubemap faces
-        glm::mat4 proj = glm::perspective(glm::radians(170.0f), 1.0f, 0.1f, 100.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
         proj[1][1] *= -1;
 
         VkViewport viewport{};
