@@ -32,10 +32,7 @@ private:
         vkDestroyRenderPass(device, lensRenderPass, nullptr);
         vkDestroyDescriptorPool(device, lensDescriptorPool, nullptr);
         vkDestroyDescriptorSetLayout(device, lensDescriptorSetLayout, nullptr);
-        vkDestroySampler(device, cubemapSampler, nullptr);
-        vkDestroyImageView(device, cubemapImageView, nullptr);
-        vkDestroyImage(device, cubemapImage, nullptr);
-        vkFreeMemory(device, cubemapImageMemory, nullptr);
+        cleanupCubemapResources();
         cleanupSwapChain();
         cleanupTexture();
         cleanupUniformBuffers();

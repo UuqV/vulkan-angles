@@ -118,3 +118,15 @@ void createCubemapResources()
 
     endSingleTimeCommands(cmd);
 }
+
+void cleanupCubemapResources()
+{
+    vkDestroySampler(device, cubemapSampler, nullptr);
+    vkDestroyImageView(device, cubemapImageView, nullptr);
+    for (int i = 0; i < 6; i++)
+    {
+        vkDestroyImageView(device, cubemapFaceViews[i], nullptr);
+    }
+    vkDestroyImage(device, cubemapImage, nullptr);
+    vkFreeMemory(device, cubemapImageMemory, nullptr);
+}
