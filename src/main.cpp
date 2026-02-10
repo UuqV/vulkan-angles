@@ -27,11 +27,7 @@ private:
     void cleanup()
     {
         vkDeviceWaitIdle(device);
-        vkDestroyPipeline(device, lensPipeline, nullptr);
-        vkDestroyPipelineLayout(device, lensPipelineLayout, nullptr);
-        vkDestroyRenderPass(device, lensRenderPass, nullptr);
-        vkDestroyDescriptorPool(device, lensDescriptorPool, nullptr);
-        vkDestroyDescriptorSetLayout(device, lensDescriptorSetLayout, nullptr);
+        cleanupLens();
         cleanupCubemapResources();
         cleanupSwapChain();
         cleanupTexture();
