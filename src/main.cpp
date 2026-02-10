@@ -28,6 +28,7 @@ private:
     {
         vkDeviceWaitIdle(device);
         cleanupLens();
+        cleanupFrameBuffers();
         cleanupCubemapResources();
         cleanupSwapChain();
         cleanupTexture();

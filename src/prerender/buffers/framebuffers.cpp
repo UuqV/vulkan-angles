@@ -20,3 +20,11 @@ void createFrameBuffers()
         vkCreateFramebuffer(device, &fbInfo, nullptr, &cubemapFramebuffers[i]);
     }
 }
+
+void cleanupFrameBuffers()
+{
+    for (int i = 0; i < 6; i++)
+    {
+        vkDestroyFramebuffer(device, cubemapFramebuffers[i], nullptr);
+    }
+}
