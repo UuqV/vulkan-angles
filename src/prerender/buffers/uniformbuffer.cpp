@@ -28,9 +28,6 @@ VkDeviceSize queryUBOAlignment()
     vkGetPhysicalDeviceProperties(physicalDevice, &props);
     VkDeviceSize minAlignment = props.limits.minUniformBufferOffsetAlignment;
 
-    std::cout << "minUniformBufferOffsetAlignment: "
-              << props.limits.minUniformBufferOffsetAlignment << std::endl;
-
     VkDeviceSize dynamicAlignment = sizeof(UniformBufferObject);
     if (minAlignment > 0)
     {
